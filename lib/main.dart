@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'screens/game_screen.dart';
 import 'screens/shop_screen.dart';
 import 'screens/spin_screen.dart';
+import 'screens/profile_screen.dart';
 import 'models/player_stats.dart';
 
 void main() {
@@ -27,7 +28,7 @@ class _CyberRunnerAppState extends State<CyberRunnerApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Cyber Runner Max',
+      title: 'Cyber Runner Next-Gen',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
       home: Builder(
@@ -36,14 +37,23 @@ class _CyberRunnerAppState extends State<CyberRunnerApp> {
             children: [
               const GameScreen(),
 
-              // أزرار التحكم بالواجهة الرئيسية (المتجر + عجلة الحظ + المكافأة اليومية)
+              // أزرار الواجهة الاحترافية الشاملة
               Positioned(
                 top: 45,
                 right: 15,
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.donut_large, color: Colors.cyanAccent, size: 30),
+                      icon: const Icon(Icons.account_circle, color: Colors.cyanAccent, size: 32),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ProfileScreen(stats: stats)),
+                        );
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.donut_large, color: Colors.purpleAccent, size: 30),
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -59,19 +69,7 @@ class _CyberRunnerAppState extends State<CyberRunnerApp> {
                       },
                     ),
                     IconButton(
-                      icon: const Icon(Icons.card_giftcard, color: Colors.pinkAccent, size: 30),
-                      onPressed: () async {
-                        bool claimed = await stats.claimDailyReward();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(claimed ? '🎉 Claimed 250 Daily Coins!' : '⏳ Next reward available tomorrow!'),
-                          ),
-                        );
-                        setState(() {});
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.shopping_bag, color: Colors.amber, size: 32),
+                      icon: const Icon(Icons.shopping_bag, color: Colors.amber, size: 30),
                       onPressed: () {
                         Navigator.push(
                           context,
