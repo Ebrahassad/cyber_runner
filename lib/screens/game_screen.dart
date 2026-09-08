@@ -10,7 +10,7 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> {
-  int playerLane = 1; // 0, 1, 2
+  int playerLane = 1;
   double score = 0;
   List<DynamicObstacle> obstacles = [];
   Timer? gameLoop;
@@ -34,7 +34,7 @@ class _GameScreenState extends State<GameScreen> {
         for (var obstacle in obstacles) {
           obstacle.update(10, 0.032);
           if (obstacle.positionZ < -10) {
-            obstacle.positionZ = 300; // إعادة التدوير
+            obstacle.positionZ = 300;
           }
         }
       });
@@ -63,7 +63,6 @@ class _GameScreenState extends State<GameScreen> {
         },
         child: Stack(
           children: [
-            // عرض العقبات المتحركة في المسارات
             ...obstacles.map((obstacle) {
               double scale = (300 - obstacle.positionZ).clamp(50, 300) / 300;
               return Positioned(
@@ -90,15 +89,13 @@ class _GameScreenState extends State<GameScreen> {
                 ),
               );
             }),
-
-            // النصوص والمعلومات بالأعلى
             Positioned(
               top: 60,
               left: 0,
               right: 0,
               child: Center(
                 child: Text(
-                  'DYNAMIC CYBER ZONE\nScore: \${score.toInt()}\,
+                  "DYNAMIC CYBER ZONE\nScore: ${score.toInt()}",
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: Colors.cyanAccent,
@@ -108,8 +105,6 @@ class _GameScreenState extends State<GameScreen> {
                 ),
               ),
             ),
-
-            // أيقونة اللاعب في الأسفل
             Positioned(
               bottom: 40,
               left: (screenWidth / 3) * playerLane + (screenWidth / 6) - 25,
