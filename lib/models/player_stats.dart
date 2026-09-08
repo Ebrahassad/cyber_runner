@@ -1,25 +1,28 @@
+import 'package:shared_preferences/shared_preferences.dart';
+
 class PlayerStats {
-  int highScore;
-  int collectedCoins;
-  int currentLevel;
+  static const String keyHighScore = 'high_score';
+  static const String keyCoins = 'total_coins';
+  static const String keyUnlockedSkin = 'unlocked_skins';
 
-  PlayerStats({
-    this.highScore = 0,
-    this.collectedCoins = 0,
-    this.currentLevel = 1,
-  });
+  int highScore = 0;
+  int coins = 0;
+  List<String> unlockedSkins = ['default'];
 
-  Map<String, dynamic> toJson() => {
-        'highScore': highScore,
-        'collectedCoins': collectedCoins,
-        'currentLevel': currentLevel,
-      };
+  Future<void> loadStats() async {
+    final prefs = await SharedPreferences.getInstance();
+    highScore = prefs.getInt(keyHighScore) ?? 0;
+    coins = prefs.getInt(keyCoins) ?? 0;
+    unlockedSkins = prefs.getStringList(keyUnlockedSkin) ?? ['default'];
+  }
 
-  factory PlayerStats.fromJson(Map<String, dynamic> json) {
-    return PlayerStats(
-      highScore: json['highScore'] ?? 0,
-      collectedCoins: json['collectedCoins'] ?? 0,
-      currentLevel: json['currentLevel'] ?? 1,
-    );
+  Future<void> saveStats(int newScore, int collectedCoins) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (newScore > highScore) {
+      highScore = newScore;
+      await prefs.setInt(keyHighScore, highScore);
+    }
+    coins += collectedCoins;
+    await prefs.setInt(keyCoins, coins);
   }
 }
