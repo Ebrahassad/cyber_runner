@@ -71,7 +71,7 @@ class _GameScreenState extends State<GameScreen> {
             Positioned(
               bottom: 40,
               left: MediaQuery.of(context).size.width / 3 * playerLane + 30,
-              child: const Icon(Icons.navigation, color: Colors.magentaAccent, size: 50),
+              child: const Icon(Icons.navigation, color: Colors.pinkAccent, size: 50),
             ),
           ],
         ),

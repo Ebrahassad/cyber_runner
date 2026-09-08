@@ -29,7 +29,7 @@ class _SpinWheelScreenState extends State<SpinWheelScreen> with SingleTickerProv
     });
 
     final random = Random();
-    final double endAngle = (360 * 5) + random.nextInt(360); // 5 دورات كاملة + زاوية عشوائية
+    final double endAngle = (360 * 5) + random.nextInt(360).toDouble(); // 5 دورات كاملة + زاوية عشوائية
     _reward = (random.nextInt(5) + 1) * 100;
 
     _animation = Tween<double>(begin: 0, end: endAngle).animate(
