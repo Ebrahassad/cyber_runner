@@ -30,12 +30,9 @@ jobs:
         run: |
           flutter create . --platforms=android --org com.cyber.runner
 
-      - name: Upgrade Dependencies to Fix Namespace Issues
+      - name: Clean & Remove Old Lockfile
         run: |
-          flutter pub upgrade google_mobile_ads
-
-      - name: Clean Project Cache
-        run: flutter clean
+          rm -f pubspec.lock
 
       - name: Get Dependencies & Packages
         run: flutter pub get
