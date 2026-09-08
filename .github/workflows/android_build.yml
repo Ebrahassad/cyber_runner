@@ -26,14 +26,13 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Verify or Generate Android Platform Files
+      - name: Generate Android Platform Directory
         run: |
-          if [ ! -d "android" ]; then
-            echo "Android directory missing. Recreating platform files..."
-            flutter create . --platforms=android --org com.cyber.runner
-          else
-            echo "Android directory found."
-          fi
+          flutter create . --platforms=android --org com.cyber.runner
+
+      - name: Upgrade Dependencies to Fix Namespace Issues
+        run: |
+          flutter pub upgrade google_mobile_ads
 
       - name: Clean Project Cache
         run: flutter clean
