@@ -1,3 +1,45 @@
+#!/bin/bash
+
+echo "⚡ جاري إضافة محرك الأعداء والحواجز الديناميكية..."
+
+# 1. إنشاء ملف إدارة الأعداء والحواجز (lib/models/dynamic_obstacle.dart)
+cat << 'FILE_OBSTACLE' > lib/models/dynamic_obstacle.dart
+enum ObstacleType { staticWall, laserGate, movingDrone, slidingBarrier }
+
+class DynamicObstacle {
+  final ObstacleType type;
+  int lane; // 0: Left, 1: Center, 2: Right
+  double positionZ;
+  bool isActive;
+  int moveDirection; // 1 for right, -1 for left
+
+  DynamicObstacle({
+    required this.type,
+    required this.lane,
+    required this.positionZ,
+    this.isActive = true,
+    this.moveDirection = 1,
+  });
+
+  void update(double speed, double dt) {
+    positionZ -= speed * dt;
+
+    // حركة طائرات الدرون بين الحارات أفقياً
+    if (type == ObstacleType.movingDrone) {
+      if (lane == 0) moveDirection = 1;
+      if (lane == 2) moveDirection = -1;
+      
+      // تغيير الحارة بشكل دوري
+      if (positionZ % 50 < 1) {
+        lane += moveDirection;
+      }
+    }
+  }
+}
+FILE_OBSTACLE
+
+# 2. تحديث شاشة اللعب لدمج الأعداء الحركية (lib/screens/game_screen.dart)
+cat << 'FILE_GAME_SCREEN' > lib/screens/game_screen.dart
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../models/dynamic_obstacle.dart';
@@ -79,3 +121,6 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 }
+FILE_GAME_SCREEN
+
+echo "✅ تم تفعيل الأعداء والحواجز الديناميكية بنجاح!"
