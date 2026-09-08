@@ -38,7 +38,7 @@ jobs:
         run: flutter pub get
 
       - name: Build APK (Split per ABI)
-        run: flutter build apk --release --split-per-abi
+        run: flutter build apk --release
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4

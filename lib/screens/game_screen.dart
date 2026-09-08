@@ -49,6 +49,8 @@ class _GameScreenState extends State<GameScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: GestureDetector(
@@ -61,17 +63,61 @@ class _GameScreenState extends State<GameScreen> {
         },
         child: Stack(
           children: [
-            Center(
-              child: Text(
-                'DYNAMIC CYBER ZONE\nScore: ${score.toInt()}',
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.cyanAccent, fontSize: 24, fontWeight: FontWeight.bold),
+            // عرض العقبات المتحركة في المسارات
+            ...obstacles.map((obstacle) {
+              double scale = (300 - obstacle.positionZ).clamp(50, 300) / 300;
+              return Positioned(
+                top: 200 + (obstacle.positionZ * 0.8),
+                left: (screenWidth / 3) * obstacle.lane + (screenWidth / 6) - 20,
+                child: Opacity(
+                  opacity: (obstacle.positionZ / 300).clamp(0.2, 1.0),
+                  child: Container(
+                    width: 40 * scale,
+                    height: 20 * scale,
+                    decoration: BoxDecoration(
+                      color: obstacle.type == ObstacleType.laserGate
+                          ? Colors.redAccent
+                          : Colors.orangeAccent,
+                      borderRadius: BorderRadius.circular(4),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.red.withOpacity(0.5),
+                          blurRadius: 8,
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }),
+
+            // النصوص والمعلومات بالأعلى
+            Positioned(
+              top: 60,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Text(
+                  'DYNAMIC CYBER ZONE\nScore: \${score.toInt()}\,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.cyanAccent,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
+
+            // أيقونة اللاعب في الأسفل
             Positioned(
               bottom: 40,
-              left: MediaQuery.of(context).size.width / 3 * playerLane + 30,
-              child: const Icon(Icons.navigation, color: Colors.pinkAccent, size: 50),
+              left: (screenWidth / 3) * playerLane + (screenWidth / 6) - 25,
+              child: const Icon(
+                Icons.navigation,
+                color: Colors.pinkAccent,
+                size: 50,
+              ),
             ),
           ],
         ),
