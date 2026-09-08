@@ -1,3 +1,137 @@
+#!/bin/bash
+
+echo "🚀 جاري تطبيق المرحلة الثالثة من التطوير..."
+
+# 1. تحديث workflow لبناء APK + AAB
+cat << 'FILE_WORKFLOW' > .github/workflows/android_build.yml
+name: Build Android Releases
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build APK
+        run: flutter build apk --release --split-per-abi
+
+      - name: Build App Bundle (AAB for Google Play)
+        run: flutter build appbundle --release
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-apk
+          path: build/app/outputs/flutter-apk/*.apk
+
+      - name: Upload AAB Artifact (Google Play Store)
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-aab
+          path: build/app/outputs/bundle/release/*.aab
+FILE_WORKFLOW
+
+# 2. تحديث pubspec.yaml
+cat << 'FILE_PUBSPEC' > pubspec.yaml
+name: cyber_runner
+description: A professional 3D-styled Endless Runner game with Monetization.
+version: 1.2.0+3
+
+environment:
+  sdk: ">=2.17.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flame: ^1.8.0
+  flame_audio: ^2.1.0
+  shared_preferences: ^2.0.15
+  google_mobile_ads: ^3.0.0
+  cupertino_icons: ^1.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/images/character/
+    - assets/images/environment/
+    - assets/images/obstacles/
+    - assets/audio/music/
+    - assets/audio/sfx/
+FILE_PUBSPEC
+
+# 3. إعداد خدمة الإعلانات
+cat << 'FILE_ADS' > lib/services/ad_service.dart
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:flutter/foundation.dart';
+
+class AdService {
+  RewardedAd? _rewardedAd;
+  bool isAdLoaded = false;
+
+  final String _rewardedAdUnitId = kDebugMode
+      ? 'ca-app-pub-3940256099942544/5224354917'
+      : 'ca-app-pub-3940256099942544/5224354917';
+
+  void loadRewardedAd() {
+    RewardedAd.load(
+      adUnitId: _rewardedAdUnitId,
+      request: const AdRequest(),
+      rewardedAdLoadCallback: RewardedAdLoadCallback(
+        onAdLoaded: (ad) {
+          _rewardedAd = ad;
+          isAdLoaded = true;
+        },
+        onAdFailedToLoad: (error) {
+          isAdLoaded = false;
+        },
+      ),
+    );
+  }
+
+  void showRewardedAd({required Function onRewardEarned}) {
+    if (_rewardedAd != null && isAdLoaded) {
+      _rewardedAd!.show(
+        onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
+          onRewardEarned();
+        },
+      );
+      _rewardedAd = null;
+      isAdLoaded = false;
+      loadRewardedAd();
+    }
+  }
+}
+FILE_ADS
+
+# 4. تحديث الشاشة الرئيسية
+cat << 'FILE_GAME' > lib/screens/game_screen.dart
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
@@ -168,3 +302,6 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 }
+FILE_GAME
+
+echo "✅ تم إعداد ملفات المرحلة الثالثة بنجاح!"

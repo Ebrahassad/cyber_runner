@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android Releases
 
 on:
   push:
@@ -28,10 +28,19 @@ jobs:
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --split-per-abi
+        run: flutter build apk --release --split-per-abi
 
-      - name: Upload Artifact
+      - name: Build App Bundle (AAB for Google Play)
+        run: flutter build appbundle --release
+
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v3
         with:
           name: android-apk
           path: build/app/outputs/flutter-apk/*.apk
+
+      - name: Upload AAB Artifact (Google Play Store)
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-aab
+          path: build/app/outputs/bundle/release/*.aab

@@ -1,6 +1,6 @@
 name: cyber_runner
-description: A professional 3D-styled Endless Runner game using Flame.
-version: 1.1.0+2
+description: A professional 3D-styled Endless Runner game with Monetization.
+version: 1.2.0+3
 
 environment:
   sdk: ">=2.17.0 <4.0.0"
@@ -11,6 +11,7 @@ dependencies:
   flame: ^1.8.0
   flame_audio: ^2.1.0
   shared_preferences: ^2.0.15
+  google_mobile_ads: ^3.0.0
   cupertino_icons: ^1.0.2
 
 dev_dependencies:
