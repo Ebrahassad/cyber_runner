@@ -26,7 +26,7 @@ class _CyberRunnerAppState extends State<CyberRunnerApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Cyber Runner Pro',
+      title: 'Cyber Runner Ultra',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
       home: Builder(
@@ -34,17 +34,35 @@ class _CyberRunnerAppState extends State<CyberRunnerApp> {
           body: Stack(
             children: [
               const GameScreen(),
+
+              // زر المتجر وزر المكافأة اليومية
               Positioned(
-                top: 50,
-                right: 20,
-                child: IconButton(
-                  icon: const Icon(Icons.shopping_cart, color: Colors.amber, size: 32),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ShopScreen(totalCoins: stats.coins)),
-                    );
-                  },
+                top: 45,
+                right: 15,
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.card_giftcard, color: Colors.pinkAccent, size: 30),
+                      onPressed: () async {
+                        bool claimed = await stats.claimDailyReward();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(claimed ? '🎉 Claimed 250 Daily Coins!' : '⏳ Next reward available tomorrow!'),
+                          ),
+                        );
+                        setState(() {});
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.shopping_bag, color: Colors.amber, size: 32),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ShopScreen(stats: stats)),
+                        ).then((_) => setState(() {}));
+                      },
+                    ),
+                  ],
                 ),
               ),
             ],
