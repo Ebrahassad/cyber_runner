@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Cyber Runner APK
 
 on:
   push:
@@ -11,7 +11,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -23,15 +24,28 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          cache: true
 
-      - name: Install Dependencies
+      - name: Verify or Generate Android Platform Files
+        run: |
+          if [ ! -d "android" ]; then
+            echo "Android directory missing. Recreating platform files..."
+            flutter create . --platforms=android --org com.cyber.runner
+          else
+            echo "Android directory found."
+          fi
+
+      - name: Clean Project Cache
+        run: flutter clean
+
+      - name: Get Dependencies & Packages
         run: flutter pub get
 
-      - name: Build APK (Universal / Split per ABI)
+      - name: Build APK (Split per ABI)
         run: flutter build apk --release --split-per-abi
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: android-apk
+          name: cyber-runner-apks
           path: build/app/outputs/flutter-apk/*.apk
