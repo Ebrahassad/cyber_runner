@@ -1,3 +1,38 @@
+#!/bin/bash
+
+echo "🚀 جاري تطبيق التحديثات المتقدمة (Power-ups + Slide + Dynamic Difficulty)..."
+
+# 1. تحديث نموذج البيانات لدعم القوة والمزايا الحالية (lib/models/player_stats.dart)
+cat << 'FILE_MODEL' > lib/models/player_stats.dart
+import 'package:shared_preferences/shared_preferences.dart';
+
+class PlayerStats {
+  static const String keyHighScore = 'high_score';
+  static const String keyCoins = 'total_coins';
+
+  int highScore = 0;
+  int coins = 0;
+
+  Future<void> loadStats() async {
+    final prefs = await SharedPreferences.getInstance();
+    highScore = prefs.getInt(keyHighScore) ?? 0;
+    coins = prefs.getInt(keyCoins) ?? 0;
+  }
+
+  Future<void> saveStats(int newScore, int collectedCoins) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (newScore > highScore) {
+      highScore = newScore;
+      await prefs.setInt(keyHighScore, highScore);
+    }
+    coins += collectedCoins;
+    await prefs.setInt(keyCoins, coins);
+  }
+}
+FILE_MODEL
+
+# 2. تحديث الشاشة الرئيسية بالفيزياء المتطورة والعوائق والـ Power-ups (lib/screens/game_screen.dart)
+cat << 'FILE_GAME' > lib/screens/game_screen.dart
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
@@ -286,3 +321,6 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 }
+FILE_GAME
+
+echo "✅ تم تحديث الميزات المتقدمة بنجاح!"
