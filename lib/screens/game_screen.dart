@@ -148,32 +148,15 @@ class _GameScreenState extends State<GameScreen> {
               double leftPos = (size.width / 2) + ((obstacle.lane - 1) * (laneWidth / 2.5)) - (30 * scale);
 
               return Positioned(
-                top: topPos - (obstacle.type == ObstacleType.highGate ? 40 * scale : 0),
+                top: topPos - (obstacle.type == ObstacleType.highGate ? 50 * scale : 0),
                 left: leftPos,
                 child: Transform.scale(
                   scale: scale,
-                  child: Container(
+                  child: SizedBox(
                     width: 60,
-                    height: obstacle.type == ObstacleType.highGate ? 70 : 35,
-                    decoration: BoxDecoration(
-                      color: obstacle.type == ObstacleType.lowBarrier
-                          ? Colors.redAccent
-                          : (obstacle.type == ObstacleType.highGate ? Colors.orangeAccent : Colors.purpleAccent),
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.red.withOpacity(0.6),
-                          blurRadius: 15,
-                        ),
-                      ],
-                    ),
-                    child: Center(
-                      child: Icon(
-                        obstacle.type == ObstacleType.lowBarrier
-                            ? Icons.block
-                            : (obstacle.type == ObstacleType.highGate ? Icons.south : Icons.air),
-                        color: Colors.white,
-                      ),
+                    height: obstacle.type == ObstacleType.highGate ? 80 : 40,
+                    child: CustomPaint(
+                      painter: ObstacleSpritePainter(type: obstacle.type),
                     ),
                   ),
                 ),
@@ -181,25 +164,15 @@ class _GameScreenState extends State<GameScreen> {
             }),
             Positioned(
               bottom: (size.height * 0.1) + playerY,
-              left: (size.width / 3) * playerLane + (size.width / 6) - 25,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 100),
-                height: 50 * playerHeightScale,
-                width: 50,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.cyanAccent,
-                      blurRadius: 25,
-                      spreadRadius: 3,
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.navigation,
-                  color: Colors.cyanAccent,
-                  size: 50 * playerHeightScale,
+              left: (size.width / 3) * playerLane + (size.width / 6) - 30,
+              child: SizedBox(
+                width: 60,
+                height: 60 * playerHeightScale,
+                child: CustomPaint(
+                  painter: CyberPlayerSpritePainter(
+                    isJumping: isJumping,
+                    isSliding: isSliding,
+                  ),
                 ),
               ),
             ),
@@ -261,6 +234,125 @@ class Pseudo3DCanvasPainter extends CustomPainter {
         ..color = Colors.pinkAccent
         ..strokeWidth = 3,
     );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+class CyberPlayerSpritePainter extends CustomPainter {
+  final bool isJumping;
+  final bool isSliding;
+
+  CyberPlayerSpritePainter({required this.isJumping, required this.isSliding});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+
+    final glowPaint = Paint()
+      ..color = Colors.cyanAccent.withOpacity(0.5)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
+    canvas.drawCircle(center, size.width / 3, glowPaint);
+
+    final firePath = Path()
+      ..moveTo(size.width * 0.35, size.height * 0.75)
+      ..lineTo(size.width * 0.5, size.height * (isSliding ? 0.9 : 1.05))
+      ..lineTo(size.width * 0.65, size.height * 0.75)
+      ..close();
+    canvas.drawPath(
+      firePath,
+      Paint()..color = Colors.pinkAccent,
+    );
+
+    final bodyPath = Path()
+      ..moveTo(size.width * 0.5, 0)
+      ..lineTo(size.width * 0.85, size.height * 0.7)
+      ..lineTo(size.width * 0.5, size.height * 0.55)
+      ..lineTo(size.width * 0.15, size.height * 0.7)
+      ..close();
+
+    final bodyPaint = Paint()
+      ..color = const Color(0xFF102A43)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(bodyPath, bodyPaint);
+
+    final borderPaint = Paint()
+      ..color = Colors.cyanAccent
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5;
+    canvas.drawPath(bodyPath, borderPaint);
+
+    canvas.drawCircle(
+      Offset(size.width * 0.5, size.height * 0.35),
+      size.width * 0.12,
+      Paint()..color = Colors.cyanAccent,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+class ObstacleSpritePainter extends CustomPainter {
+  final ObstacleType type;
+
+  ObstacleSpritePainter({required this.type});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (type == ObstacleType.lowBarrier) {
+      final rect = RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, size.height * 0.3, size.width, size.height * 0.7),
+        const Radius.circular(6),
+      );
+      canvas.drawRRect(
+        rect,
+        Paint()..color = Colors.redAccent.withOpacity(0.85),
+      );
+      canvas.drawRRect(
+        rect,
+        Paint()
+          ..color = Colors.white
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2,
+      );
+
+      final stripePaint = Paint()..color = Colors.yellowAccent;
+      for (double i = 5; i < size.width; i += 15) {
+        canvas.drawLine(
+          Offset(i, size.height * 0.35),
+          Offset(i + 8, size.height * 0.95),
+          stripePaint..strokeWidth = 3,
+        );
+      }
+    } else if (type == ObstacleType.highGate) {
+      final pillarPaint = Paint()..color = Colors.orangeAccent;
+      canvas.drawRect(Rect.fromLTWH(0, 0, 10, size.height), pillarPaint);
+      canvas.drawRect(Rect.fromLTWH(size.width - 10, 0, 10, size.height), pillarPaint);
+
+      canvas.drawRect(Rect.fromLTWH(0, 0, size.width, 15), pillarPaint);
+
+      final laserPaint = Paint()
+        ..color = Colors.deepOrange
+        ..strokeWidth = 6
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+      canvas.drawLine(
+        Offset(5, 10),
+        Offset(size.width - 5, 10),
+        laserPaint,
+      );
+    } else {
+      final center = Offset(size.width / 2, size.height / 2);
+
+      canvas.drawCircle(Offset(size.width * 0.2, center.dy), 8, Paint()..color = Colors.purpleAccent);
+      canvas.drawCircle(Offset(size.width * 0.8, center.dy), 8, Paint()..color = Colors.purpleAccent);
+
+      canvas.drawCircle(center, 14, Paint()..color = const Color(0xFF2D1B69));
+      canvas.drawCircle(center, 14, Paint()..color = Colors.purpleAccent..style = PaintingStyle.stroke..strokeWidth = 2);
+
+      canvas.drawCircle(center, 5, Paint()..color = Colors.redAccent);
+    }
   }
 
   @override
